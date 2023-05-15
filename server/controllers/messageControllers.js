@@ -2,6 +2,8 @@ const MessageModel = require("../models/messageModel");
 const axios = require("axios");
 const { createBot } = require("whatsapp-cloud-api");
 
+const token = "";
+
 const formatCustomerMobileNumber = (mobileNumber) => {
   if (mobileNumber.length == 10) {
     return `91${mobileNumber}`;
@@ -82,7 +84,27 @@ exports.getReply = async (req, res) => {
     ) {
       let phone_no_id =
         body.entry[0].challenge[0].value.metadata.phone_number_id;
-      let text = body.entry[0].challenge[0].value.messages[0].text.body;
+      let from = body.entry[0].changes[0].value.messages[0].from;
+      let text = body.entry[0].changes[0].value.messages[0].text.body;
+
+      axios({
+        method: "POST",
+        url:
+          "https://graph.facebook.com/v16.0/" +
+          phone_no_id +
+          "/messages?access_token=" +
+          token,
+        data: {
+          messaging_product: "whatsapp",
+          to: from,
+          text: {
+            body: "Hi I",
+          },
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
   }
 };

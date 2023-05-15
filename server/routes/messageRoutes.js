@@ -13,7 +13,7 @@ const {
 
 router.post("/sendMessage", sendMessage);
 router.post("/getMessages", getMessage);
-router.get("/webhookverify", verify);
+router.get("/webhook", verify);
 router.post("/webhook", getReply);
 
 module.exports = router;
