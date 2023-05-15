@@ -1,6 +1,7 @@
 const MessageModel = require("../models/messageModel");
 const axios = require("axios");
 const { createBot } = require("whatsapp-cloud-api");
+const customerModel = require("../models/customerModel");
 
 const token = "";
 
@@ -82,28 +83,17 @@ exports.getReply = async (req, res) => {
       body.entry[0].changes[0].value.messages &&
       body.entry[0].changes[0].value.messages[0]
     ) {
-      let phone_no_id =
-        body.entry[0].challenge[0].value.metadata.phone_number_id;
+      let phone_no_id = body.entry[0].changes[0].value.metadata.phone_number_id;
+      let customerMobileNumber =
+        body.entry[0].changes[0].value.contacts[0].wa_id;
       let from = body.entry[0].changes[0].value.messages[0].from;
       let text = body.entry[0].changes[0].value.messages[0].text.body;
-
-      axios({
-        method: "POST",
-        url:
-          "https://graph.facebook.com/v16.0/" +
-          phone_no_id +
-          "/messages?access_token=" +
-          token,
-        data: {
-          messaging_product: "whatsapp",
-          to: from,
-          text: {
-            body: "Hi I",
-          },
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
+      let customerDoc = await customerModel.find({ customerMobileNumber });
+      await MessageModel.create({
+        message: text,
+        conversationIDbject: "6455454db42a48ef1b560b68",
+        senderID: customerDoc._id,
+        senderType: "customer",
       });
     }
   }
