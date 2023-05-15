@@ -91,7 +91,7 @@ exports.getReply = async (req, res) => {
       let customerDoc = await customerModel.find({ customerMobileNumber });
       await MessageModel.create({
         message: text,
-        conversationIDbject: "6455454db42a48ef1b560b68",
+        conversationID: "6455454db42a48ef1b560b68",
         senderID: customerDoc._id,
         senderType: "customer",
       });
