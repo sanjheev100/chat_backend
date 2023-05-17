@@ -79,7 +79,6 @@ exports.verify = async (req, res) => {
 
 exports.getReply = async (req, res) => {
   let body = req.body;
-  console.log(JSON.stringify(body, null, 2));
   if (body.object) {
     if (
       body.entry &&
@@ -87,6 +86,7 @@ exports.getReply = async (req, res) => {
       body.entry[0].changes[0].value.messages &&
       body.entry[0].changes[0].value.messages[0]
     ) {
+      console.log(body.entry[0].changes[0].value);
       let message_id = body.entry[0].changes[0].value.messages[0].id;
       let phone_no_id = body.entry[0].changes[0].value.metadata.phone_number_id;
       let customerMobileNumber =
@@ -95,16 +95,20 @@ exports.getReply = async (req, res) => {
       let text = body.entry[0].changes[0].value.messages[0].text.body;
       let customerDoc = await customerModel.find({ customerMobileNumber });
       let messageDoc = await MessageModel.find({ customerMobileNumber });
-      await MessageModel.findByIdAndUpdate(
-        { customerMobileNumber, messageID: message_id },
-        {
-          message: text,
-          senderID: customerDoc._id,
-          senderType: "customer",
-          status: "delivered",
-        },
-        { upsert: true }
-      );
+      try {
+        await MessageModel.findOneAndUpdate(
+          { customerMobileNumber, messageID: message_id },
+          {
+            message: text,
+            senderID: customerDoc._id,
+            senderType: "customer",
+            status: "delivered",
+          },
+          { upsert: true }
+        );
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
   return res.status(200);
