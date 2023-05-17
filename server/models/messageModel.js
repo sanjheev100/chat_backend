@@ -9,6 +9,14 @@ const messageSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    messageID: {
+      type: String,
+      required: true,
+    },
+    customerMobileNumber: {
+      type: String,
+      required: true,
+    },
     message: {
       type: String,
       required: true,
@@ -18,6 +26,11 @@ const messageSchema = new mongoose.Schema(
     },
     senderType: {
       type: String,
+    },
+    status: {
+      type: String,
+      enum: ["Pending", "Not Delivered", "Sent", "Delivered", "Seen"],
+      default: "Pending",
     },
   },
   { timestamps: true }

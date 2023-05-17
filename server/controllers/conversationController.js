@@ -4,10 +4,10 @@ const CustomerModel = require("../models/customerModel");
 const axios = require("axios").default;
 
 exports.createConversation = async (req, res) => {
-  const {
+  let {
     customerMobileNumber,
-    agentEmail,
     customerName = "Caratlane Customer",
+    agentEmail,
   } = req.body;
 
   if (!agentEmail || !customerMobileNumber || !customerName) {
@@ -16,14 +16,16 @@ exports.createConversation = async (req, res) => {
       .json({ message: "Agent Email and Customer Details Must be provided" });
   }
   try {
+    customerMobileNumber = `91${customerMobileNumber}`;
     let customerDoc = await CustomerModel.findOne({ customerMobileNumber });
     let agentDoc = await AgentModel.findOne({ agentEmail });
     let conversationDoc = await ConversationModel.findOne({
       customerID: customerDoc,
-      agentID: agentDoc._id,
-    }).populate("agentID customerID");
-    if (conversationDoc) {
-      return res.status(201).json(conversationDoc);
+    }).populate(" customerID");
+    if (!agentDoc) {
+      agentDoc = await agentDoc.create({
+        agentEmail,
+      });
     }
     if (!customerDoc) {
       customerDoc = await new CustomerModel({
@@ -31,19 +33,17 @@ exports.createConversation = async (req, res) => {
         customerName: "Caratlane Customer",
       }).save();
     }
-    if (!agentDoc) {
-      agentDoc = await agentDoc.create({
-        agentEmail,
+    if (conversationDoc) {
+      return res.status(201).json(conversationDoc);
+    } else {
+      conversationDoc = await ConversationModel.create({
+        customerID: customerDoc._id,
       });
     }
-
-    await ConversationModel.create({
-      agentID: agentDoc._id,
-      customerID: customerDoc._id,
-    });
     await CustomerModel.findByIdAndUpdate(customerDoc, {
       $push: { previousAgents: agentDoc._id },
-    }).populate("agentID customerID");
+    });
+    console.log(conversationDoc);
     res.status(200).json(conversationDoc);
   } catch (error) {
     console.log("Error While Creating Agent ::", error);
@@ -53,12 +53,9 @@ exports.createConversation = async (req, res) => {
 
 exports.getConversation = async (req, res) => {
   try {
-    const { agentID } = req.body;
-    console.log(agentID);
-    let converstionsList = await ConversationModel.find({ agentID }).populate(
+    let converstionsList = await ConversationModel.find().populate(
       "customerID"
     );
-    console.log(converstionsList);
     return res.status(200).json({ data: converstionsList });
   } catch (error) {
     console.log("Error While Getting Conversations ::", error);

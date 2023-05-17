@@ -2,6 +2,7 @@ const MessageModel = require("../models/messageModel");
 const axios = require("axios");
 const { createBot } = require("whatsapp-cloud-api");
 const customerModel = require("../models/customerModel");
+const { response } = require("express");
 
 const token = "";
 
@@ -31,11 +32,14 @@ exports.sendMessage = async (req, res) => {
       message,
       { preview_url: true }
     );
+    console.log(result);
     await MessageModel.create({
+      messageID: result.messageId,
       message,
       conversationID,
       senderID,
       senderType,
+      customerMobileNumber,
     });
     res.status(200).json({
       message: "Message sent Successfully",
@@ -83,18 +87,25 @@ exports.getReply = async (req, res) => {
       body.entry[0].changes[0].value.messages &&
       body.entry[0].changes[0].value.messages[0]
     ) {
+      let message_id = body.entry[0].changes[0].value.messages[0].id;
       let phone_no_id = body.entry[0].changes[0].value.metadata.phone_number_id;
       let customerMobileNumber =
         body.entry[0].changes[0].value.contacts[0].wa_id;
       let from = body.entry[0].changes[0].value.messages[0].from;
       let text = body.entry[0].changes[0].value.messages[0].text.body;
       let customerDoc = await customerModel.find({ customerMobileNumber });
-      await MessageModel.create({
-        message: text,
-        conversationID: "6455454db42a48ef1b560b68",
-        senderID: customerDoc._id,
-        senderType: "customer",
-      });
+      let messageDoc = await MessageModel.find({ customerMobileNumber });
+      await MessageModel.findByIdAndUpdate(
+        { customerMobileNumber, messageID: message_id },
+        {
+          message: text,
+          senderID: customerDoc._id,
+          senderType: "customer",
+          status: "delivered",
+        },
+        { upsert: true }
+      );
     }
   }
+  return res.status(200);
 };

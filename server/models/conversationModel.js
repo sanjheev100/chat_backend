@@ -3,11 +3,6 @@ const { ObjectId } = mongoose.Schema;
 
 const conversationSchema = new mongoose.Schema(
   {
-    agentID: {
-      type: ObjectId,
-      ref: "Agents",
-      required: true,
-    },
     customerID: {
       type: ObjectId,
       ref: "Whatsapp_Customers",
