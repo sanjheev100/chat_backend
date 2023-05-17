@@ -101,7 +101,7 @@ exports.getReply = async (req, res) => {
             message: text,
             senderID: customerDoc._id,
             senderType: "customer",
-            status: "delivered",
+            status: "from_customer",
           },
           { upsert: true }
         );
