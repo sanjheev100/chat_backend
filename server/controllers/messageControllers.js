@@ -86,7 +86,6 @@ exports.getReply = async (req, res) => {
       body.entry[0].changes[0].value.messages &&
       body.entry[0].changes[0].value.messages[0]
     ) {
-      console.log(body.entry[0].changes[0].value);
       let message_id = body.entry[0].changes[0].value.messages[0].id;
       let phone_no_id = body.entry[0].changes[0].value.metadata.phone_number_id;
       let customerMobileNumber =
@@ -105,6 +104,25 @@ exports.getReply = async (req, res) => {
             status: "delivered",
           },
           { upsert: true }
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    } else if (
+      body.entry &&
+      body.entry[0].changes &&
+      body.entry[0].changes[0].value.statuses &&
+      body.entry[0].changes[0].value.statuses[0]
+    ) {
+      let message_id = body.entry[0].changes[0].value.statuses[0].id;
+      let status = body.entry[0].changes[0].value.statuses[0].status;
+      let timestamp = body.entry[0].changes[0].value.statuses[0].timestamp;
+      try {
+        await MessageModel.findOneAndUpdate(
+          { messageID: message_id },
+          {
+            status: status,
+          }
         );
       } catch (error) {
         console.log(error);
