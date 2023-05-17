@@ -51,9 +51,9 @@ exports.sendMessage = async (req, res) => {
 };
 
 exports.getMessage = async (req, res) => {
-  const { conversationID } = req.body;
+  const { customerMobileNumber } = req.body;
   try {
-    let messagesArray = await MessageModel.find({ conversationID });
+    let messagesArray = await MessageModel.find({ customerMobileNumber });
     return res.status(200).json({ data: messagesArray });
   } catch (error) {
     console.log("Error While Fetching Message ::", error);
