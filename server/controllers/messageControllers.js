@@ -124,6 +124,7 @@ exports.getReply = async (req, res) => {
             status: status,
           }
         );
+        console.log("Message Status Updated Successfully", message_id);
       } catch (error) {
         console.log(error);
       }
